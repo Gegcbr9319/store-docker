@@ -1,0 +1,54 @@
+version: "3.8"
+
+services:
+  store-frontend:
+    build:
+      context: ../store-frontend
+      dockerfile: ../store-docker/Dockerfile.store-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../store-frontend:/usr/app
+    networks:
+      strapi:
+  store-cms:
+    build:
+      context: ../store-cms
+      dockerfile: ../store-docker/Dockerfile.store-cms
+    ports:
+      - "1337:1337"
+    volumes:
+      - ../store-cms:/usr/app
+    environment:
+      APP_KEYS: ${APP_KEYS}
+      API_TOKEN_SALT: ${API_TOKEN_SALT}
+      ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
+      TRANSFER_TOKEN_SALT: ${TRANSFER_TOKEN_SALT}
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_HOST: db
+      DATABASE_CLIENT: postgres
+      DATABASE_PORT: 5432
+      DATABASE_SSL: "false"
+      NODE_ENV: ${NODE_ENV}
+    networks:
+      strapi:
+  db:
+    image: postgres:14.1-alpine
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+    volumes:
+      - /db/var/lib/postgresql/data
+    networks:
+      strapi:
+
+networks:
+  strapi:
+volumes:
+  db:
